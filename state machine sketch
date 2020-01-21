@@ -1,35 +1,74 @@
+enum State {On, Off, Run, Sleep, Diagnostic};
+
+State currState;
 int ledPin = LED_BUILTIN;
+int redPin = 13;
+int bluePin = 12;
+int greenPin = 11;
+
+int button1 = 22;
+int button2 = 23;
+int switchOn = 24;
+
 int runFlashPot = 0;
 int runBrightPot = 1;
 
-int brightness = 175;
+int initBrightness = 175;
+int runTime = 5000;
 //int fadeAmount = 5;
+long runStart, runStopTime;
 
 void setup() {
-  // put your setup code here, to run once:
+  currState = On;
   pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(ledPin, INPUT); 
-  //attachInterrupt(digitalPinToInterrupt(), blink, CHANGE);
+  pinMode(button1, INPUT);
+  pinMode(button2, INPUT);
+  pinMode(ledPin, OUTPUT);
+  pinMode(redPin, OUTPUT);
+  pinMode(bluePin, OUTPUT);
+  pinMode(greenPin, OUTPUT);
+  attachInterrupt(digitalPinToInterrupt(button1), button1ISR, CHANGE);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  fade(1000, ledPin, 5); //time in milliseconds
-  while(true){
-    blink(10, ledPin); //10 Hz
+  switch (currState) {
+    case On:
+      blink(2000, 10, redPin);
+      currState = Run;
+      runStart = millis();
+      break;
+    case Run:
+      if (millis() - runStart >= runTime) {
+        currState = Sleep;
+        break;
+      }
+      executeRun();
+      break;
+    case Sleep:
+      executeSleep();
+      break;
+    case Off:
+      break;
+    case Diagnostic:
+      break;
   }
 }
 
-void blink(int freq, int pinNum) {
-  float delayTime = ((1 / (float)freq) / 2) * 1000; //this needs to change
-  digitalWrite(pinNum, HIGH);
-  delay(delayTime);
-  digitalWrite(pinNum, LOW);
-  delay(delayTime);
+void blink(long blinkTime, int freq, int pinNum) {
+  long startTime = millis();
+  long stopTime = startTime;
+  while((stopTime - startTime) <= blinkTime){
+    float delayTime = ((1 / (float)freq) / 2) * 1000; //this needs to change
+    digitalWrite(pinNum, HIGH);
+    delay(delayTime);
+    digitalWrite(pinNum, LOW);
+    delay(delayTime);
+    stopTime = millis();
+  }
 }
 
 void fade(long fadeTime, int pinNum, int fadeAmount) {
-
+  int brightness = initBrightness;
   long startTime = millis();
   long stopTime = startTime;
   while((stopTime - startTime) <= fadeTime){
@@ -44,4 +83,39 @@ void fade(long fadeTime, int pinNum, int fadeAmount) {
     delay(30);
     stopTime = millis();
   }
+}
+
+void decayOverMs(long decayMs, int pinNum) {
+  int brightness = initBrightness;
+  long startTime = millis();
+  long stopTime = startTime;
+  int decayIncrement = initBrightness / ((float)decayMs / 30);
+  decayIncrement = (decayIncrement == 0) ? 1 : decayIncrement;
+  while((stopTime - startTime) <= decayMs){
+    analogWrite(pinNum, brightness);
+    
+    brightness = brightness - decayIncrement;
+    
+    if (brightness <= 0 || brightness >= 255){
+      brightness = 0;
+    }
+  
+    delay(30);
+    stopTime = millis();
+  }
+}
+
+void executeRun() {
+  decayOverMs(6000, greenPin);
+  blink(500, 4, greenPin);
+}
+
+void executeSleep() {
+  blink(1000, 4, bluePin);
+  fade(1000, bluePin, 5);
+}
+
+void button1ISR() {
+  currState = Run;
+  digitalWrite(ledPin, HIGH);
 }
