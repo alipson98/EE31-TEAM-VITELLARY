@@ -21,7 +21,7 @@ void loop() {
 }
 
 void blink(int freq, int pinNum) {
-  float delayTime = ((1 / freq) / 2) * 1000;
+  float delayTime = ((1 / freq) / 2) * 1000; //this needs to change
   digitalWrite(pinNum, HIGH);
   delay(delayTime);
   digitalWrite(pinNum, LOW);
