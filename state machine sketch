@@ -2,32 +2,37 @@ enum State {On, Off, Run, Sleep, Diagnostic};
 
 State currState;
 int ledPin = LED_BUILTIN;
-int redPin = 13;
+int redPin = 9;
 int bluePin = 12;
 int greenPin = 11;
 
-int button1 = 22;
-int button2 = 23;
-int switchOn = 24;
+const byte button1 = 2;
+const byte button2 = 3;
+const byte switchOn = 4;
 
 int runFlashPot = 0;
 int runBrightPot = 1;
 
-int initBrightness = 175;
+int initBrightness = 100;
 int runTime = 5000;
 //int fadeAmount = 5;
 long runStart, runStopTime;
+
+bool shouldReturn = false;
 
 void setup() {
   currState = On;
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(button1, INPUT);
   pinMode(button2, INPUT);
+  pinMode(switchOn, INPUT);
   pinMode(ledPin, OUTPUT);
   pinMode(redPin, OUTPUT);
   pinMode(bluePin, OUTPUT);
   pinMode(greenPin, OUTPUT);
-  attachInterrupt(digitalPinToInterrupt(button1), button1ISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(button1), button1ISR, RISING);
+  attachInterrupt(digitalPinToInterrupt(button2), button2ISR, RISING);
+  attachInterrupt(digitalPinToInterrupt(switchOn), switchISR, CHANGE);
 }
 
 void loop() {
@@ -38,6 +43,7 @@ void loop() {
       runStart = millis();
       break;
     case Run:
+      analogWrite(bluePin, 0);
       if (millis() - runStart >= runTime) {
         currState = Sleep;
         break;
@@ -48,8 +54,12 @@ void loop() {
       executeSleep();
       break;
     case Off:
+      analogWrite(redPin, 0);
+      analogWrite(bluePin, 0);
+      analogWrite(greenPin, 0);
       break;
     case Diagnostic:
+      executeDiagnostic();
       break;
   }
 }
@@ -58,6 +68,9 @@ void blink(long blinkTime, int freq, int pinNum) {
   long startTime = millis();
   long stopTime = startTime;
   while((stopTime - startTime) <= blinkTime){
+    if(shouldReturn){
+      return;
+    }
     float delayTime = ((1 / (float)freq) / 2) * 1000; //this needs to change
     digitalWrite(pinNum, HIGH);
     delay(delayTime);
@@ -72,6 +85,9 @@ void fade(long fadeTime, int pinNum, int fadeAmount) {
   long startTime = millis();
   long stopTime = startTime;
   while((stopTime - startTime) <= fadeTime){
+    if(shouldReturn){
+      return;
+    }
     analogWrite(pinNum, brightness);
     
     brightness = brightness - fadeAmount;
@@ -83,6 +99,7 @@ void fade(long fadeTime, int pinNum, int fadeAmount) {
     delay(30);
     stopTime = millis();
   }
+
 }
 
 void decayOverMs(long decayMs, int pinNum) {
@@ -92,6 +109,9 @@ void decayOverMs(long decayMs, int pinNum) {
   int decayIncrement = initBrightness / ((float)decayMs / 30);
   decayIncrement = (decayIncrement == 0) ? 1 : decayIncrement;
   while((stopTime - startTime) <= decayMs){
+    if(shouldReturn){
+      return;
+    }
     analogWrite(pinNum, brightness);
     
     brightness = brightness - decayIncrement;
@@ -108,14 +128,55 @@ void decayOverMs(long decayMs, int pinNum) {
 void executeRun() {
   decayOverMs(6000, greenPin);
   blink(500, 4, greenPin);
+  shouldReturn = false;
 }
 
 void executeSleep() {
   blink(1000, 4, bluePin);
-  fade(1000, bluePin, 5);
+  decayOverMs(1000, bluePin);
+  shouldReturn = false;
+}
+
+void executeDiagnostic()
+{
+  analogWrite(redPin, initBrightness);
+  delay(500);
+  analogWrite(redPin, 0);
+  analogWrite(bluePin, initBrightness);
+  delay(500);
+  analogWrite(bluePin, 0);
+  analogWrite(greenPin, initBrightness);
+  delay(500);
+  analogWrite(greenPin, 0);
 }
 
 void button1ISR() {
   currState = Run;
-  digitalWrite(ledPin, HIGH);
+  runStart = millis();
+  shouldReturn = true;
+}
+
+void button2ISR(){
+  if(currState != Diagnostic)
+  {
+    currState = Diagnostic;
+  }
+  else{
+    runStart = millis();
+    currState = Run;
+  }
+  shouldReturn = true;
+}
+
+void switchISR(){
+  if(!digitalRead(switchOn))
+  {
+    currState = Off;
+    shouldReturn = true;
+    digitalWrite(ledPin, HIGH);
+  }
+ else
+ {
+  currState = On;
+ }
 }
