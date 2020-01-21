@@ -1,19 +1,47 @@
-int ledPin = 13;
+int ledPin = LED_BUILTIN;
+int runFlashPot = 0;
+int runBrightPot = 1;
+
+int brightness = 175;
+//int fadeAmount = 5;
 
 void setup() {
   // put your setup code here, to run once:
-pinMode(LED_BUILTIN, OUTPUT);
-pinMode(ledPin, INPUT); 
-attachInterrupt(digitalPinToInterrupt(ledPin), run, CHANGE);
+  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(ledPin, INPUT); 
+  //attachInterrupt(digitalPinToInterrupt(), blink, CHANGE);
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-
+  fade(1000, ledPin, 5); //time in milliseconds
+  while(true){
+    blink(10, ledPin); //10 Hz
+  }
 }
 
-void run() {
-digitalWrite(LED_BUILTIN, HIGH);
-delay(1000);
-digitalWrite(LED_BUILTIN, LOW);
+void blink(int freq, int pinNum) {
+  float delayTime = ((1 / freq) / 2) * 1000;
+  digitalWrite(pinNum, HIGH);
+  delay(delayTime);
+  digitalWrite(pinNum, LOW);
+  delay(delayTime);
+}
+
+void fade(long fadeTime, int pinNum, int fadeAmount) {
+
+  long startTime = millis();
+  long stopTime = startTime;
+  while((stopTime - startTime) <= fadeTime){
+    analogWrite(pinNum, brightness);
+    
+    brightness = brightness - fadeAmount;
+    
+    if (brightness <= 0 || brightness >= 255){
+      fadeAmount = -fadeAmount;
+    }
+  
+    delay(30);
+    stopTime = millis();
+  }
 }
