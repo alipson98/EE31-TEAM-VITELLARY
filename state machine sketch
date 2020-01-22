@@ -8,7 +8,9 @@ int greenPin = 11;
 
 const byte button1 = 2;
 const byte button2 = 3;
-const byte switchOn = 4;
+const byte switchOn = 18;
+const byte switch1 = 19;
+const byte switch2 = 21;
 
 int runFlashPot = 0;
 int runBrightPot = 1;
@@ -19,9 +21,10 @@ int runTime = 5000;
 long runStart, runStopTime;
 
 bool shouldReturn = false;
+bool statusRSBO = false; //Red should be on
+bool statusBB = false; //Blue blink
 
 void setup() {
-  currState = On;
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(button1, INPUT);
   pinMode(button2, INPUT);
@@ -33,6 +36,15 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(button1), button1ISR, RISING);
   attachInterrupt(digitalPinToInterrupt(button2), button2ISR, RISING);
   attachInterrupt(digitalPinToInterrupt(switchOn), switchISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(switch1), switch1ISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(switch2), switch2ISR, CHANGE);
+  if(digitalRead(switchOn)){
+    currState = On;
+  }
+  else
+  {
+    currState = Off;
+  }
 }
 
 void loop() {
@@ -43,7 +55,6 @@ void loop() {
       runStart = millis();
       break;
     case Run:
-      analogWrite(bluePin, 0);
       if (millis() - runStart >= runTime) {
         currState = Sleep;
         break;
@@ -57,6 +68,7 @@ void loop() {
       analogWrite(redPin, 0);
       analogWrite(bluePin, 0);
       analogWrite(greenPin, 0);
+      shouldReturn = false;
       break;
     case Diagnostic:
       executeDiagnostic();
@@ -78,6 +90,27 @@ void blink(long blinkTime, int freq, int pinNum) {
     delay(delayTime);
     stopTime = millis();
   }
+}
+
+void blinkSub2(long blinkTime, int freq, int pinNum) {
+  long startTime = millis();
+  long stopTime = startTime;
+  while((stopTime - startTime) <= blinkTime){
+    if(shouldReturn){
+      return;
+    }
+    if(statusRSBO){
+      digitalWrite(redPin, HIGH);
+    }
+    float delayTime = ((1 / (float)freq) / 2) * 1000; //this needs to change
+    digitalWrite(pinNum, HIGH);
+    delay(delayTime);
+    digitalWrite(pinNum, LOW);
+    delay(delayTime);
+    stopTime = millis();
+  }
+
+  digitalWrite(redPin, LOW);
 }
 
 void fade(long fadeTime, int pinNum, int fadeAmount) {
@@ -126,8 +159,10 @@ void decayOverMs(long decayMs, int pinNum) {
 }
 
 void executeRun() {
+  executeRunSub();
   decayOverMs(6000, greenPin);
   blink(500, 4, greenPin);
+  executeRunSub();
   shouldReturn = false;
 }
 
@@ -137,6 +172,22 @@ void executeSleep() {
   shouldReturn = false;
 }
 
+void executeRunSub() {
+  while(statusBB)
+  {
+    shouldReturn = false;
+    digitalWrite(greenPin, HIGH);
+    blink(2000, 1, bluePin);
+    blinkSub2(2000, 10, bluePin);
+    if(digitalRead(switch1)){
+      statusBB = false;
+      break;
+    }
+  }
+  digitalWrite(greenPin, LOW);
+  digitalWrite(bluePin, LOW);
+  digitalWrite(redPin, LOW);
+}
 void executeDiagnostic()
 {
   analogWrite(redPin, initBrightness);
@@ -150,6 +201,7 @@ void executeDiagnostic()
   analogWrite(greenPin, 0);
 }
 
+//-------------------ISR--------------------------
 void button1ISR() {
   currState = Run;
   runStart = millis();
@@ -173,10 +225,32 @@ void switchISR(){
   {
     currState = Off;
     shouldReturn = true;
-    digitalWrite(ledPin, HIGH);
   }
  else
  {
   currState = On;
  }
+}
+
+void switch1ISR(){
+  if(!digitalRead(switch1))
+  {
+    statusBB = true;
+    shouldReturn = true;
+  }
+  else{
+    shouldReturn = true;
+    statusBB = false;
+  }
+  
+}
+
+void switch2ISR(){
+  if(digitalRead(switch2)){
+    statusRSBO = true;
+  }
+  else{
+    statusRSBO = false;
+  }
+    
 }
