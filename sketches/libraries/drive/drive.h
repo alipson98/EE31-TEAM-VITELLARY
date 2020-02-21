@@ -7,6 +7,11 @@
 #ifndef DRIVE_H
 #define DRIVE_H
 
+const  int left_speed = 3;
+const  int right_speed = 9;
+const  int left_direction = 32;
+const  int right_direction = 34;
+
 // class Drive
 // {
 //     public:
