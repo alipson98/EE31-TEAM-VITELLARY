@@ -5,11 +5,22 @@ int red_out = 22;
 int blue_out = 26;
 int yellow_out = 24;
 int orange_out = 23;
+
+
+// enum Track_color {red_track, blue_track, yellow_track, black_track};
 Track_color init_color;
 
 bool backed = false;
 bool detected = false;
 bool to_stop = false;
+
+
+
+// int red_led = 0, blue_led = 0, both = 0; 
+// enum Track_color {red_track, blue_track, yellow_track, black_track};
+// const  int RED_PIN = 10;
+// const  int BLUE_PIN = 12;
+// const  int SENSOR_PIN = A0;
 
 void setup() {
   pinMode(10, OUTPUT);
@@ -27,10 +38,12 @@ void setup() {
 
 
 void loop() {
+  // Serial.print("current time: ")
+
   Track_color color = detect_color();
 
-  digitalWrite(10, LOW);
-  digitalWrite(12, HIGH);
+  // digitalWrite(10, LOW);
+  // digitalWrite(12, HIGH);
 
   // Serial.print(init_color);
   // Serial.print("    ");
@@ -83,19 +96,21 @@ void loop() {
   }
 
   if (backed && !detected) {
-    Drive_spin_left();
+    Drive_spin_right();
   }
-  if (backed && color == blue_track) {
+  if (backed && !detected && color == red_track) {
+    Serial.println("red stop");
     Drive_stop();
     delay(700);
     detected = true;
   }
 
   if (detected && !to_stop) {
-    Drive_spin_right();
+    Drive_spin_left();
   }
 
-  if (color == red_track) {
+  if (color == blue_track) {
+    Serial.println("blue stop");
     Drive_stop();
     to_stop = true;
   }
@@ -107,3 +122,5 @@ void loop() {
     digitalWrite(orange_out, LOW);
   }
 }
+
+
