@@ -2,12 +2,7 @@
 #include "drive.h"
 
 const static int MAX_SPEED = 240;
-const static int speed2 = 175;
-
-const static int left_speed = 3;
-const static int right_speed = 9;
-const static int left_direction = 24;
-const static int right_direction = 22;
+const static int speed2 = 100;
 
 #define MOTOR_FORWARD 1
 #define MOTOR_BACK 0
