@@ -11,6 +11,10 @@
 #include "Arduino.h"
 #include "sensor.h"
 
+int detect_magnet() {
+    // Serial.println(analogRead(A1));
+    return analogRead(A1);
+}
 
 
 Track_color detect_color() {
@@ -47,7 +51,7 @@ Track_color detect_color() {
 
     if ((float)red_led / (float)blue_led >= 1.3) {
         return red_track;
-    } else if ((float)blue_led / (float)red_led >= 2.5) {
+    } else if ((float)blue_led / (float)red_led >= 2.2) {
         return blue_track;
     } else {
         if (both > 1500) {
