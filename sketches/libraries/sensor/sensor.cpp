@@ -11,6 +11,9 @@
 #include "Arduino.h"
 #include "sensor.h"
 
+static int red_led = 0, blue_led = 0, both = 0; 
+const  int timing_interval = 50;
+
 int detect_magnet() {
     // Serial.println(analogRead(A1));
     return analogRead(A1);
@@ -18,20 +21,42 @@ int detect_magnet() {
 
 
 Track_color detect_color() {
+    // Serial.println("entering");
     int red_led, blue_led, both;
     // digitalWrite(RED_PIN, LOW);
     digitalWrite(BLUE_PIN, LOW);
-    // delay(10);
+    // delay(2);
     // ambient = 10 * analogRead(SENSOR_PIN);
     digitalWrite(RED_PIN, HIGH);
-    delay(10);
+    delay(2);
     red_led = 10 * analogRead(SENSOR_PIN);
     digitalWrite(BLUE_PIN, HIGH);
-    delay(10);
+    delay(2);
     both = 10 * analogRead(SENSOR_PIN);
     digitalWrite(RED_PIN, LOW);
-    delay(10);
+    delay(2);
     blue_led = 10 * analogRead(SENSOR_PIN);
+    digitalWrite(BLUE_PIN, LOW);
+
+
+    // int curr_time = millis() % timing_interval;
+
+    // if (curr_time < timing_interval/3) {
+    //     // Serial.println("red");
+    //     digitalWrite(BLUE_PIN, LOW);
+    //     digitalWrite(RED_PIN, HIGH);
+    //     red_led = 10 * analogRead(SENSOR_PIN);
+    // } else if (curr_time < 2 * timing_interval / 3) {
+    //     // Serial.println("both");
+    //     digitalWrite(BLUE_PIN, HIGH);
+    //     digitalWrite(RED_PIN, HIGH);
+    //     both = 10 * analogRead(SENSOR_PIN);
+    // } else {
+    //     // Serial.println("blue");
+    //     digitalWrite(BLUE_PIN, HIGH);
+    //     digitalWrite(RED_PIN, LOW);
+    //     blue_led = 10 * analogRead(SENSOR_PIN);
+    // }
 
     // Serial.begin(9600);
     // Serial.print("red led: ");
