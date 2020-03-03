@@ -53,3 +53,6 @@ void Drive_pivot_right() {
     digitalWrite(left_direction, MOTOR_FORWARD);
     digitalWrite(right_direction, MOTOR_FORWARD);
 }
+
+#undef MOTOR_FORWARD
+#undef MOTOR_BACK

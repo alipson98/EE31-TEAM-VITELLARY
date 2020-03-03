@@ -11,50 +11,63 @@
 #include "Arduino.h"
 #include "sensor.h"
 
-int detect_magnet() {
-    // Serial.println(analogRead(A1));
-    return analogRead(A1);
+static int red_val, blue_val, both_val;
+// static Track_color returnval = black_track;
+static int prev = 0;
+// static int count = 0;
+
+bool detect_magnet() {
+    return (analogRead(A1) <= 10);
 }
 
 
 Track_color detect_color() {
-    int red_led, blue_led, both;
-    // digitalWrite(RED_PIN, LOW);
-    digitalWrite(BLUE_PIN, LOW);
-    // delay(10);
-    // ambient = 10 * analogRead(SENSOR_PIN);
-    digitalWrite(RED_PIN, HIGH);
-    delay(10);
-    red_led = 10 * analogRead(SENSOR_PIN);
-    digitalWrite(BLUE_PIN, HIGH);
-    delay(10);
-    both = 10 * analogRead(SENSOR_PIN);
-    digitalWrite(RED_PIN, LOW);
-    delay(10);
-    blue_led = 10 * analogRead(SENSOR_PIN);
+    int op = (millis() % 60) / 20;
+    if (op == 0) {
+        digitalWrite(BLUE_PIN, LOW);
+        digitalWrite(RED_PIN, HIGH);
+        if (op == prev){
+            red_val = 10 * analogRead(SENSOR_PIN);
+        }
+        prev = op;
+    } else if (op == 1) {
+        digitalWrite(BLUE_PIN, HIGH);
+        digitalWrite(RED_PIN, HIGH);
+        if (op == prev) {
+            both_val = 10 * analogRead(SENSOR_PIN);
+        }
+        prev = op;
+    } else {
+        digitalWrite(RED_PIN, LOW);
+        digitalWrite(BLUE_PIN, HIGH);
+        if (op == prev) {
+            blue_val = 10 * analogRead(SENSOR_PIN);
+        }
+        prev = op;
+    }
+    // count++;
 
-    // Serial.begin(9600);
     // Serial.print("red led: ");
-    // delay(5);
-    // Serial.println(red_led);
-    // delay(5);
+    // // delay(5);
+    // Serial.println(red_val);
+    // // delay(5);
     // Serial.print("blue led: ");
-    // delay(5);
-    // Serial.println(blue_led);
-    // delay(5);
+    // // delay(5);
+    // Serial.println(blue_val);
+    // // delay(5);
     // Serial.print("both: ");
-    // delay(5);
-    // Serial.println(both);
+    // // delay(5);
+    // Serial.println(both_val);
 
 
-    if (both <= 1200) return black_track;
+    if (both_val <= 1600) return black_track;
 
-    if ((float)red_led / (float)blue_led >= 1.3) {
+    if ((float)red_val / (float)blue_val >= 1.3) {
         return red_track;
-    } else if ((float)blue_led / (float)red_led >= 2.2) {
+    } else if ((float)blue_val / (float)red_val >= 2.2) {
         return blue_track;
     } else {
-        if (both > 1500) {
+        if (both_val > 1600) {
             return yellow_track;
         } else {
             return black_track;
