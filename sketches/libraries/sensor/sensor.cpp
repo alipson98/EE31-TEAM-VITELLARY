@@ -12,9 +12,14 @@
 #include "sensor.h"
 
 static int red_val, blue_val, both_val;
-// static Track_color returnval = black_track;
+
+/**
+ * bug fix:
+ * there was an issue where the track color would be incorrect when the sensor
+ * LEDs switched due to bad data storage
+ * fix by only updating variables 
+ */
 static int prev = 0;
-// static int count = 0;
 
 bool detect_magnet() {
     return (analogRead(A1) <= 10);
