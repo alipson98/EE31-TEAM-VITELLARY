@@ -20,7 +20,7 @@ void loop() {
 }
 
 void wake_up(){
-
+//intentionally left blank
 }
 
 void SleepNow(){
