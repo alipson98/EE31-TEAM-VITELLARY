@@ -1,15 +1,17 @@
-const int right_F = 5;
-const int right_R = 6;
-const int left_F = 9;
-const int left_R = 10;
+const int right_1 = 5;
+const int right_2 = 6;
+const int left_3 = 9;
+const int left_4 = 10;
 bool lightTrack = false;
+
+#include <drive.h>
 
 
 void setup() {
-  pinMode(right_F,OUTPUT);
-  pinMode(right_R,OUTPUT);
-  pinMode(left_F,OUTPUT);
-  pinMode(left_R,OUTPUT);
+  pinMode(right_1,OUTPUT);
+  pinMode(right_2,OUTPUT);
+  pinMode(left_3,OUTPUT);
+  pinMode(left_4,OUTPUT);
   pinMode (A0, INPUT);
   //Serial.begin(9600);
 }
@@ -46,55 +48,4 @@ void Follow_Light() {
     Drive_stop();
   }
   
-}
-void Drive_forward() {
-  digitalWrite(left_F, HIGH);
-  digitalWrite(left_R, LOW);
-  digitalWrite(right_F, HIGH);
-  digitalWrite(right_R, LOW);
-}
-
-void Drive_backward() {
-  digitalWrite(left_F, LOW);
-  digitalWrite(left_R, HIGH);
-  digitalWrite(right_F, LOW);
-  digitalWrite(right_R, HIGH);
-}
-
-void Drive_stop() {
-  digitalWrite(left_F, LOW);
-  digitalWrite(left_R, LOW);
-  digitalWrite(right_F, LOW);
-  digitalWrite(right_R, LOW);
-}
-
-//spin = center of rotation is the center of the bot
-void Drive_spin_left(){
-  digitalWrite(left_F, LOW);
-  digitalWrite(left_R, HIGH);
-  digitalWrite(right_F, HIGH);
-  digitalWrite(right_R, LOW);
-  
-}
-
-void Drive_spin_right(){
-  digitalWrite(left_F, HIGH);
-  digitalWrite(left_R, LOW);
-  digitalWrite(right_F, LOW);
-  digitalWrite(right_R, HIGH);
-}
-
-//pivot = center of rotation is left or right wheel
-void Drive_pivot_left(){
-  digitalWrite(left_F, LOW);
-  digitalWrite(left_R, LOW);
-  digitalWrite(right_F, HIGH);
-  digitalWrite(right_R, LOW);
-}
-
-void Drive_pivot_right(){
-  digitalWrite(left_F, HIGH);
-  digitalWrite(left_R, LOW);
-  digitalWrite(right_F, LOW);
-  digitalWrite(right_R, LOW);
 }
