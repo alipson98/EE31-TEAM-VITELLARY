@@ -15,9 +15,8 @@ void loop() {
   // put your main code here, to run repeatedly:
   SleepNow();
   
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(5000);
-  digitalWrite(LED_BUILTIN, LOW);
+  
+  //the rest of your code below~~~~~~~~~
 }
 
 void wake_up(){
