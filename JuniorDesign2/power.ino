@@ -8,12 +8,11 @@ void setup() {
   // put your setup code here, to run once:
 pinMode(thermPin, INPUT);
 attachInterrupt(digitalPinToInterrupt(thermPin), wake_up, CHANGE);
-
+SleepNow();
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  SleepNow();
   
   
   //the rest of your code below~~~~~~~~~
