@@ -4,6 +4,7 @@ const static int right_F = 5;
 const static int right_R = 6;
 const static int left_F = 9;
 const static int left_R = 10;
+const int greenLED = 12;
 bool lightTrack = false;
 
 const static int inf_reciever = 4;
