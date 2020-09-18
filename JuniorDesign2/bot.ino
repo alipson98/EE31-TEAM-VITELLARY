@@ -10,43 +10,20 @@ const static int inf_reciever = 4;
 const int AN_SPEED = 100;
 
 void setup(){
-pinMode(5,OUTPUT);
-pinMode(6,OUTPUT);
-pinMode(9,OUTPUT);
-pinMode(10,OUTPUT);
-Serial.begin(9600);
+    pinMode(5,OUTPUT);
+    pinMode(6,OUTPUT);
+    pinMode(9,OUTPUT);
+    pinMode(10,OUTPUT);
+    Serial.begin(9600);
 }
 
 
 void loop(){
     if (digitalRead(inf_reciever)) {
-        track(0, AN_SPEED);
+        Drive_pivot_right();
     } else {
-        track(AN_SPEED, 0);
+        Drive_pivot_left();
     }
-  
-  
-}
-
-void track(int leftSpeed, int rightSpeed) {
-  if (leftSpeed > 0) {
-    digitalWrite(left_R, LOW);
-    analogWrite(left_F, leftSpeed);
-  }
-  else {
-    digitalWrite(left_F, LOW);
-    analogWrite(left_R, -leftSpeed);
-  }
-
-  if (rightSpeed > 0) {
-    digitalWrite(right_R, LOW);
-    analogWrite(right_F, rightSpeed);
-  }
-  else {
-    digitalWrite(right_F, LOW);
-    analogWrite(right_R, -rightSpeed);
-  }
-  
 }
 
 void readthepins(){
