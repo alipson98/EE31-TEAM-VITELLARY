@@ -3,6 +3,7 @@
 #include <SPI.h>
 #include <WiFiNINA.h>
 
+/*** these name macros should be used only as reference to ser ME and PARTNER ***/
 #define SEAN "2EA3F426665F"
 #define BRANDON "59350B9773E5"
 #define TASWAR "F37F8862AD3C"
@@ -10,7 +11,13 @@
 #define VARUN "A021AFE7B2B2"
 #define JOE "6363A1807A43"
 
+// TODO: set these to the correct values
+#define ME "86A43FF4A96C" // adam
+#define PARTNER "A021AFE7B2B2" // varun
+
 #define MAX_MESSAGE_SIZE 1024
+
+enum BOT_STATE {IDLE, TRACKING, LISTEN, FINISHED};
 
 // TODO: fill this in your wifi info
 const char ssid[] = "Raccoon Net";        // your network SSID (name)
@@ -28,12 +35,17 @@ const static int right_R = 6;
 const static int left_F = 9;
 const static int left_R = 10;
 const int greenLED = 12;
+const static int wifiLED = 11;
 bool lightTrack = false;
 
 const static int inf_reciever = 4;
 
 const int AN_SPEED = 100;
 const int LIGHT_THRESHOLD = 775;
+
+BOT_STATE state;
+const unsigned int light_track_length = 15000; // 15 seconds
+unsigned long light_track_start;
 
 void setup(){
     pinMode(5,OUTPUT);
@@ -77,17 +89,34 @@ void setup(){
   // if you get a connection, report back via serial:
   if (client.connect(server, 80)) {
     Serial.println("connected to server");
+    digitalWrite(wifiLED, HIGH);
   }
+
+  // TODO: thermistor sleep here, wait for wake up
+
+  state = LISTEN;
 }
 
 
 void loop(){
-  // if (digitalRead(inf_reciever)) {
-  //     Drive_pivot_right();
-  // } else {
-  //     Drive_pivot_left();
-  // }
-  Follow_Light();
+  switch (state)
+  {
+  case LISTEN:
+    GETServer(ME, PARTNER);
+    delay(300); // delay to not overload the server
+    if (client.available()){
+      getMessageData();
+    }
+    break;
+  case TRACKING:
+    Follow_Light();
+    break;
+  case FINISHED:
+    while(1);
+  
+  default:
+    break;
+  }
 }
 
 void readthepins(){
@@ -157,27 +186,49 @@ void Follow_Light() {
     if (analogRead(A0) < LIGHT_THRESHOLD) {
       digitalWrite(greenLED, HIGH);
       lightTrack = true;
+      sendPost("foundLight=true", ME, PARTNER);
       while(lightTrack) {
+        if (millis() - light_track_start > light_track_length) {
+          state = FINISHED;
+          return;
+        }
         Drive_forward();
           if (analogRead(A0) >= LIGHT_THRESHOLD) {
             for (int i = 0; i < 4; i++) {
               Drive_pivot_left();
-              delay(500);
+              for (int j = 0; j < 10; j++) {
+                delay(50);
+                if (analogRead(A0) < LIGHT_THRESHOLD) {
+                  goto found;
+                }
+              }
+              // delay(500);
               Drive_stop();
-              if (analogRead(A0) < LIGHT_THRESHOLD) {
-                break;
-              }
+              // if (analogRead(A0) < LIGHT_THRESHOLD) {
+              //   break;
+              // }
               Drive_pivot_right();
-              delay(1000);
-              if (analogRead(A0) < LIGHT_THRESHOLD) {
-                break;
+              // delay(1000);
+              for (int j = 0; j < 20; j++) {
+                delay(50);
+                if (analogRead(A0) < LIGHT_THRESHOLD) {
+                  goto found;
+                }
               }
+              // if (analogRead(A0) < LIGHT_THRESHOLD) {
+              //   break;
+              // }
               if (i == 3) {
                 lightTrack = false;
               }
             }
-          
+          found:
+          Drive_stop();
+          if (lightTrack) {
+            sendPost("foundLight=true", ME, PARTNER);
+          }
         }
+        
     }
     Drive_stop();
     digitalWrite(greenLED, LOW);
@@ -327,4 +378,8 @@ void parse_and_execute(String message) {
 void execute_key_value(String key, String value) {
   Serial.print(key + ": ");
   Serial.println(value);
+  if(key.equals("lightTrack") && value.equals("start")){
+    state = TRACKING;
+    light_track_start = millis();
+  }
 }

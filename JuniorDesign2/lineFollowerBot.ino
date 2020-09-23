@@ -3,6 +3,7 @@
 #include <SPI.h>
 #include <WiFiNINA.h>
 
+/*** these name macros should be used only as reference to ser ME and PARTNER ***/
 #define SEAN "2EA3F426665F"
 #define BRANDON "59350B9773E5"
 #define TASWAR "F37F8862AD3C"
@@ -10,9 +11,16 @@
 #define VARUN "A021AFE7B2B2"
 #define JOE "6363A1807A43"
 
-#define MAX_MESSAGE_SIZE 1024
+// TODO: set these to the correct values
+#define ME "86A43FF4A96C" // adam
+#define PARTNER "A021AFE7B2B2" // varun
 
-// TODO: fill this in your wifi info
+#define MAX_MESSAGE_SIZE 1024
+#define FOLLOW_TIMEOUT 1000 // 1 second
+
+enum BOT_STATE {IDLE, ENTERING_FOLLOWING, FOLLOWING, LISTENING};
+
+// FIXME: fill this in your wifi info
 const char ssid[] = "Raccoon Net";        // your network SSID (name)
 const char pass[] = "hauntedhouse";    // your network password (use for WPA, or use as key for WEP)
 int keyIndex = 0;            // your network key Index number (needed only for WEP)
@@ -28,6 +36,8 @@ const static int right_R = 6;
 const static int left_F = 9;
 const static int left_R = 10;
 const int greenLED = 12;
+const static int wifiLED = 11;
+
 bool lightTrack = false;
 
 const static int inf_reciever = 4;
@@ -35,15 +45,21 @@ const static int inf_reciever = 4;
 const int AN_SPEED = 100;
 const int LIGHT_THRESHOLD = 775;
 
+BOT_STATE state;
+unsigned long time_saw_line;
+bool green_led_on = false;
+unsigned long green_led_start;
+unsigned int green_led_flash_time = 500; // blink for half a second
+
 void setup(){
-    pinMode(5,OUTPUT);
-    pinMode(6,OUTPUT);
-    pinMode(9,OUTPUT);
-    pinMode(10,OUTPUT);
-    pinMode(A0, INPUT);
-    Serial.begin(9600);
-    while (!Serial) {
-    ; // wait for serial port to connect. Needed for native USB port only
+  pinMode(5,OUTPUT);
+  pinMode(6,OUTPUT);
+  pinMode(9,OUTPUT);
+  pinMode(10,OUTPUT);
+  pinMode(A0, INPUT);
+  Serial.begin(9600);
+  while (!Serial) {
+  ; // wait for serial port to connect. Needed for native USB port only
   }
   if (WiFi.status() == WL_NO_MODULE) {
     Serial.println("Communication with WiFi module failed!");
@@ -76,17 +92,56 @@ void setup(){
   // if you get a connection, report back via serial:
   if (client.connect(server, 80)) {
     Serial.println("connected to server");
+    digitalWrite(wifiLED, HIGH);
   }
+  sendPost("", ME, PARTNER);
+  // TODO: thermistor sleep here, wait for wake up
+
+  state = ENTERING_FOLLOWING;
 }
 
 
 void loop(){
-  // if (digitalRead(inf_reciever)) {
-  //     Drive_pivot_right();
-  // } else {
-  //     Drive_pivot_left();
-  // }
-  Follow_Light();
+  
+  switch (state)
+  {
+  case ENTERING_FOLLOWING:
+    time_saw_line = millis();
+    state = FOLLOWING;
+    break;
+  case FOLLOWING:
+    if (digitalRead(inf_reciever)) {
+        Drive_pivot_right();
+        time_saw_line = millis();
+    } else {
+        Drive_pivot_left();
+        if (millis() - time_saw_line > FOLLOW_TIMEOUT) {
+          Drive_stop();
+          sendPost("myTask=complete&lightTrack=start", ME, PARTNER);
+          state = LISTENING;
+        }
+    }
+    break;
+  case LISTENING:
+    GETServer(ME, PARTNER);
+    delay(300); // delay to not overload the server
+    if (client.available()){
+      getMessageData();
+    }
+    break;
+  
+  default:
+    break;
+  }
+
+  // green led handler
+  if (green_led_on) {
+    digitalWrite(greenLED, HIGH);
+    if (millis() - green_led_start > green_led_flash_time) {
+      green_led_on = false;
+    }
+  }
+
 }
 
 void readthepins(){
@@ -326,4 +381,8 @@ void parse_and_execute(String message) {
 void execute_key_value(String key, String value) {
   Serial.print(key + ": ");
   Serial.println(value);
+  if (key.equals("foundLight") && value.equals("true")) {
+    green_led_on = true;
+    green_led_start = millis();
+  }
 }
