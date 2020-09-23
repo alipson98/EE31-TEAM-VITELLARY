@@ -1,31 +1,38 @@
-#include <avr/sleep.h>
+//thermistor pin will be A1
 
-//pin 7 thermistor
-
-int thermPin = 7;
+int thermPin = A1;
+int tempReading = 0;
+int statusLight = 2;
 
 void setup() {
   // put your setup code here, to run once:
 pinMode(thermPin, INPUT);
-attachInterrupt(digitalPinToInterrupt(thermPin), wake_up, CHANGE);
+pinMode(statusLight, OUTPUT);
+tempReading = analogRead(thermPin);
 SleepNow();
+
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  
-  
-  //the rest of your code below~~~~~~~~~
 }
 
-void wake_up(){
-//intentionally left blank
-}
 
 void SleepNow(){
-  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-  sleep_enable();
-  sleep_mode();
-  sleep_disable();
-  detachInterrupt(digitalPinToInterrupt(thermPin));
+  while(tempReading < 540)
+  {
+    delay(1000);
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(1000);
+    digitalWrite(LED_BUILTIN, LOW);
+    tempReading = analogRead(thermPin);
+    Serial.println(tempReading);
+    if(tempReading >= 540){
+      digitalWrite(LED_BUILTIN, LOW);
+      digitalWrite(statusLight, HIGH);
+      delay(1500);
+      digitalWrite(statusLight, LOW);
+      break;
+    }
+  }
 }
