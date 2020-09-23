@@ -94,7 +94,7 @@ void setup(){
     Serial.println("connected to server");
     digitalWrite(wifiLED, HIGH);
   }
-  sendPost("", ME, PARTNER);
+  sendPost("reset=true", ME, PARTNER);
   // TODO: thermistor sleep here, wait for wake up
 
   state = ENTERING_FOLLOWING;
@@ -102,6 +102,9 @@ void setup(){
 
 
 void loop(){
+  if (client.available()){
+    getMessageData();
+  }
   
   switch (state)
   {
@@ -116,14 +119,18 @@ void loop(){
     } else {
         Drive_pivot_left();
         if (millis() - time_saw_line > FOLLOW_TIMEOUT) {
+          Serial.println("follow failed");
           Drive_stop();
           sendPost("myTask=complete&lightTrack=start", ME, PARTNER);
+          while(true);
           state = LISTENING;
         }
     }
     break;
   case LISTENING:
-    GETServer(ME, PARTNER);
+    Serial.println("listening");
+    // GETServer(ME, PARTNER);
+    GETServer(PARTNER, ME);
     delay(300); // delay to not overload the server
     if (client.available()){
       getMessageData();
@@ -264,6 +271,9 @@ void printWifiStatus() {
  * @param receiverID 
  */
 void sendPost(char *message, const char * senderID, const char * receiverID) {
+  if (!client.connected()) {
+    client.connect(server, 80);
+  }
   String route = String("POST /") + senderID + "/" + receiverID + " HTTP/1.1";
   client.println(route);     
   client.print("Host: ");     

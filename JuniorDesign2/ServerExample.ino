@@ -34,7 +34,7 @@
 #define MAX_MESSAGE_SIZE 1024
 
 
-#include "arduino_secrets.h" 
+// #include "arduino_secrets.h" 
 ///////please enter your sensitive data in the Secret tab/arduino_secrets.h
 const char ssid[] = "Raccoon Net";        // your network SSID (name)
 const char pass[] = "hauntedhouse";    // your network password (use for WPA, or use as key for WEP)
@@ -121,17 +121,36 @@ void setup() {
   if (client.connect(server, 80)) {
     Serial.println("connected to server");
     // Make a HTTP request:
-    // sendPost("led=on&pin=12", ADAM, VARUN);
+    sendPost("led=on&pin=12", ADAM, VARUN);
+    // sendPost("fast=fast", ADAM, VARUN);
 
   }
   // GETServer(VARUN, ADAM);
 }
 
 void loop() {
-  if (!did) {
+  // if (!did) {
     GETServer(VARUN, ADAM);
-    did = true;
+    delay(300);
+  //   did = true;
+  // }
+  // GETServer(VARUN, ADAM);
+  // if there are incoming bytes available
+  // from the server, read them and print them:
+  // while (client.available()) {
+  //   char c = client.read();
+  //   Serial.write(c);
+  // }
+  if (client.available()){
+    getMessageData();
   }
+  delay(1000);
+  sendPost("second=post", ADAM, VARUN);
+  delay(300);
+    GETServer(VARUN, ADAM);
+    // delay(300);
+  //   did = true;
+  // }
   // GETServer(VARUN, ADAM);
   // if there are incoming bytes available
   // from the server, read them and print them:
@@ -180,16 +199,19 @@ void printWifiStatus() {
  * @param receiverID 
  */
 void sendPost(char *message, const char * senderID, const char * receiverID) {
-  String route = String("POST /") + senderID + "/" + receiverID + " HTTP/1.1";
-  client.println(route);     
-  client.print("Host: ");     
-  client.println(server);     
-  client.println("Content-Type: application/x-www-form-urlencoded");     
-  client.print("Content-Length: ");     
-  int postBodyLength = strlen(message);     
-  client.println(postBodyLength);     
-  client.println();     
-  client.print(message);
+    if (!client.connected()) {
+      client.connect(server, 80);
+    }
+    String route = String("POST /") + senderID + "/" + receiverID + " HTTP/1.1";
+    client.println(route);     
+    client.print("Host: ");     
+    client.println(server);     
+    client.println("Content-Type: application/x-www-form-urlencoded");     
+    client.print("Content-Length: ");     
+    int postBodyLength = strlen(message);     
+    client.println(postBodyLength);     
+    client.println();     
+    client.print(message);
 }
 
 /**

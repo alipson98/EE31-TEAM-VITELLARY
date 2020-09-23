@@ -17,7 +17,7 @@
 
 #define MAX_MESSAGE_SIZE 1024
 
-enum BOT_STATE {IDLE, TRACKING, LISTEN, FINISHED};
+enum BOT_STATE {IDLE, TRACKING, LISTENING, FINISHED};
 
 // TODO: fill this in your wifi info
 const char ssid[] = "Raccoon Net";        // your network SSID (name)
@@ -94,14 +94,14 @@ void setup(){
 
   // TODO: thermistor sleep here, wait for wake up
 
-  state = LISTEN;
+  state = LISTENING;
 }
 
 
 void loop(){
   switch (state)
   {
-  case LISTEN:
+  case LISTENING:
     GETServer(ME, PARTNER);
     delay(300); // delay to not overload the server
     if (client.available()){
@@ -261,6 +261,9 @@ void printWifiStatus() {
  * @param receiverID 
  */
 void sendPost(char *message, const char * senderID, const char * receiverID) {
+  if (!client.connected()) {
+    client.connect(server, 80);
+  }
   String route = String("POST /") + senderID + "/" + receiverID + " HTTP/1.1";
   client.println(route);     
   client.print("Host: ");     
