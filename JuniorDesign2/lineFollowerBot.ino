@@ -122,7 +122,7 @@ void loop(){
           Serial.println("follow failed");
           Drive_stop();
           sendPost("myTask=complete&lightTrack=start", ME, PARTNER);
-          while(true);
+          // while(true);
           state = LISTENING;
         }
     }
@@ -130,7 +130,7 @@ void loop(){
   case LISTENING:
     Serial.println("listening");
     // GETServer(ME, PARTNER);
-    GETServer(PARTNER, ME);
+    GETServer(ME, PARTNER);
     delay(300); // delay to not overload the server
     if (client.available()){
       getMessageData();
