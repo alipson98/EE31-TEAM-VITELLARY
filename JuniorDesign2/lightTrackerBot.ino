@@ -232,6 +232,7 @@ void Follow_Light() {
         }
         Drive_forward();
           if (analogRead(A0) >= LIGHT_THRESHOLD) {
+            not_found:
             for (int i = 0; i < 4; i++) {
               Drive_pivot_left();
               for (int j = 0; j < 10; j++) {
@@ -263,13 +264,15 @@ void Follow_Light() {
           found:
           Drive_stop();
           if (lightTrack) {
-            sendPost("foundLight=true", ME, PARTNER);
+            // sendPost("foundLight=true", ME, PARTNER);
           }
         }
         
     }
     Drive_stop();
     digitalWrite(greenLED, LOW);
+  } else {
+    goto not_found;
   }
   
 }

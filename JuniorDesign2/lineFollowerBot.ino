@@ -56,7 +56,7 @@ BOT_STATE state;
 unsigned long time_saw_line;
 bool green_led_on = false;
 unsigned long green_led_start;
-unsigned int green_led_flash_time = 500; // blink for half a second
+unsigned int green_led_flash_time = 2000; // blink for two seconds
 
 void setup(){
   pinMode(5,OUTPUT);
@@ -153,6 +153,9 @@ void loop(){
           sendPost("myTask=complete&lightTrack=start", ME, PARTNER);
           // while(true);
           state = LISTENING;
+          delay(2000);
+          green_led_start = millis();
+          green_led = true;
         }
     }
     break;
@@ -161,7 +164,7 @@ void loop(){
     analogWrite(RED, 240);
     digitalWrite(GREEN, HIGH);
     analogWrite(3, 42);
-    Serial.println("listening");
+    // Serial.println("listening");
     // GETServer(ME, PARTNER);
     GETServer(ME, PARTNER);
     delay(300); // delay to not overload the server
