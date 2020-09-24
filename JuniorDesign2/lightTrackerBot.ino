@@ -36,12 +36,19 @@ const static int left_F = 9;
 const static int left_R = 10;
 const int greenLED = 12;
 const static int wifiLED = 11;
+const static int RED = 11;
+const static int GREEN = 7; // digital because we ran out of pwm pins
+const static int BLUE = 3;
 bool lightTrack = false;
+const int thermPin = A1;
+int tempReading = 0;
+int statusLight = 2;
+const int thermThresh = 267; // TODO: test and change this to the correct value
 
 const static int inf_reciever = 4;
 
 const int AN_SPEED = 100;
-const int LIGHT_THRESHOLD = 775;
+const int LIGHT_THRESHOLD = 775; // TODO: set this
 
 BOT_STATE state;
 const unsigned int light_track_length = 15000; // 15 seconds
@@ -53,6 +60,12 @@ void setup(){
     pinMode(9,OUTPUT);
     pinMode(10,OUTPUT);
     pinMode(A0, INPUT);
+    pinMode(greenLED, OUTPUT);
+    pinMode(wifiLED, OUTPUT);
+    pinMode(statusLight, OUTPUT);
+    pinMode(RED, OUTPUT);
+    pinMode(GREEN, OUTPUT);
+    pinMode(BLUE, OUTPUT);
     Serial.begin(9600);
     while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
@@ -62,6 +75,7 @@ void setup(){
     // don't continue
     while (true);
   }
+  Drive_stop();
 
   String fv = WiFi.firmwareVersion();
   if (fv < WIFI_FIRMWARE_LATEST_VERSION) {
@@ -92,7 +106,14 @@ void setup(){
     digitalWrite(wifiLED, HIGH);
   }
 
-  // TODO: thermistor sleep here, wait for wake up
+  // rgb led purple
+  analogWrite(RED, 150);
+  digitalWrite(GREEN, LOW);
+  analogWrite(3, 210);
+
+  pinMode(thermPin, INPUT);
+  tempReading = analogRead(thermPin);
+  SleepNow();
 
   state = LISTENING;
 }
@@ -102,6 +123,11 @@ void loop(){
   switch (state)
   {
   case LISTENING:
+    // rgb led yellow
+    analogWrite(RED, 240);
+    digitalWrite(GREEN, HIGH);
+    analogWrite(3, 42);
+
     GETServer(ME, PARTNER);
     delay(300); // delay to not overload the server
     if (client.available()){
@@ -109,10 +135,16 @@ void loop(){
     }
     break;
   case TRACKING:
+    // rgb led green
+    analogWrite(RED, 0);
+    digitalWrite(GREEN, HIGH);
+    analogWrite(3, 0);
+
     Follow_Light();
     break;
   case FINISHED:
-    while(1);
+    sendPost("finished=true", ME, PARTNER);
+    lightShow(); // dead loop
   
   default:
     break;
@@ -384,5 +416,21 @@ void execute_key_value(String key, String value) {
   if(key.equals("lightTrack") && value.equals("start")){
     state = TRACKING;
     light_track_start = millis();
+  }
+}
+
+void SleepNow(){
+  // Serial.println(analogRead(thermPin));
+  while(tempReading < thermThresh)
+  {
+    // Serial.println(analogRead(thermPin));
+    digitalWrite(LED_BUILTIN, LOW);
+    tempReading = analogRead(thermPin);
+    Serial.println(tempReading);
+    if(tempReading >= thermThresh){
+      digitalWrite(LED_BUILTIN, LOW);
+
+      break;
+    }
   }
 }
