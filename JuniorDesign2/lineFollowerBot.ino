@@ -179,6 +179,7 @@ void loop(){
     digitalWrite(greenLED, HIGH);
     if (millis() - green_led_start > green_led_flash_time) {
       green_led_on = false;
+      digitalWrite(greenLED, LOW);
     }
   }
 

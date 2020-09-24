@@ -111,6 +111,7 @@ void setup(){
   digitalWrite(GREEN, LOW);
   analogWrite(3, 210);
 
+  sendPost("reset=true", ME, PARTNER);
   pinMode(thermPin, INPUT);
   tempReading = analogRead(thermPin);
   SleepNow();
@@ -143,12 +144,17 @@ void loop(){
     Follow_Light();
     break;
   case FINISHED:
-    sendPost("finished=true", ME, PARTNER);
-    lightShow(); // dead loop
+    finish();
   
   default:
     break;
   }
+}
+
+void finish() {
+  Drive_stop();
+  sendPost("finished=true", ME, PARTNER);
+  lightShow(); // dead loop
 }
 
 void readthepins(){
@@ -218,7 +224,7 @@ void Follow_Light() {
     if (analogRead(A0) < LIGHT_THRESHOLD) {
       digitalWrite(greenLED, HIGH);
       lightTrack = true;
-      sendPost("foundLight=true", ME, PARTNER);
+      // sendPost("foundLight=true", ME, PARTNER);
       while(lightTrack) {
         if (millis() - light_track_start > light_track_length) {
           state = FINISHED;
