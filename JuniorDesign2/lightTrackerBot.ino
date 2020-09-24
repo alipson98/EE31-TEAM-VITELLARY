@@ -4,12 +4,12 @@
 #include <WiFiNINA.h>
 
 /*** these name macros should be used only as reference to ser ME and PARTNER ***/
-#define SEAN "2EA3F426665F"
-#define BRANDON "59350B9773E5"
-#define TASWAR "F37F8862AD3C"
-#define ADAM "86A43FF4A96C"
-#define VARUN "A021AFE7B2B2"
-#define JOE "6363A1807A43"
+// SEAN "2EA3F426665F"
+// BRANDON "59350B9773E5"
+// TASWAR "F37F8862AD3C"
+// ADAM "86A43FF4A96C"
+// VARUN "A021AFE7B2B2"
+// JOE "6363A1807A43"
 
 // TODO: set these to the correct values
 #define ME "86A43FF4A96C" // adam
