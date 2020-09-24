@@ -434,3 +434,72 @@ void SleepNow(){
     }
   }
 }
+
+
+void lightShow(){
+  for (int i = 0; i < 5; i++) {
+    // red
+    analogWrite(RED, 255);
+    digitalWrite(GREEN, LOW);
+    analogWrite(3, 0);
+    delay(500);
+
+    // green
+    analogWrite(RED, 0);
+    digitalWrite(GREEN, HIGH);
+    analogWrite(3, 0);
+    delay(500);
+
+    // blue
+    analogWrite(RED, 0);
+    digitalWrite(GREEN, LOW);
+    analogWrite(3, 255);
+    delay(500);
+  }
+
+  for (int i = 0; i < 5; i++) {
+    // red
+    analogWrite(RED, 120);
+    digitalWrite(GREEN, HIGH);
+    analogWrite(3, 200);
+    delay(500);
+
+    // green
+    analogWrite(RED, 255);
+    digitalWrite(GREEN, HIGH);
+    analogWrite(3, 0);
+    delay(500);
+
+    // blue
+    analogWrite(RED, 0);
+    digitalWrite(GREEN, HIGH);
+    analogWrite(3, 100);
+    delay(500);
+  }
+
+  for (int i = 0; i < 5; i++) {
+    // red
+    analogWrite(RED, 255);
+    digitalWrite(GREEN, LOW);
+    analogWrite(3, 0);
+    delay(500);
+
+    // green
+    analogWrite(RED, 0);
+    digitalWrite(GREEN, HIGH);
+    analogWrite(3, 0);
+    delay(500);
+
+    // blue
+    analogWrite(RED, 0);
+    digitalWrite(GREEN, LOW);
+    analogWrite(3, 255);
+    delay(500);
+  }
+
+  // off and end
+  analogWrite(RED, 0);
+  digitalWrite(GREEN, LOW);
+  analogWrite(3, 0);
+  while(true);
+}
