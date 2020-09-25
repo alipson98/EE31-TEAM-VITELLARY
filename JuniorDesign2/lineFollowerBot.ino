@@ -16,7 +16,7 @@
 #define PARTNER "A021AFE7B2B2" // varun
 
 #define MAX_MESSAGE_SIZE 1024
-#define FOLLOW_TIMEOUT 1000 // 1 second
+#define FOLLOW_TIMEOUT 500 // 1 second
 
 enum BOT_STATE {IDLE, ENTERING_FOLLOWING, FOLLOWING, LISTENING};
 
@@ -43,7 +43,7 @@ const static int BLUE = 3;
 const int thermPin = A1;
 int tempReading = 0;
 int statusLight = 2;
-const int thermThresh = 267; // TODO: test and change this to the correct value
+const int thermThresh = 283; // TODO: test and change this to the correct value
 
 bool lightTrack = false;
 
@@ -155,7 +155,7 @@ void loop(){
           state = LISTENING;
           delay(2000);
           green_led_start = millis();
-          green_led = true;
+          green_led_on = true;
         }
     }
     break;
@@ -432,6 +432,7 @@ void execute_key_value(String key, String value) {
     green_led_on = true;
     green_led_start = millis();
   } else if (key.equals("finished") && value.equals("true")){
+    digitalWrite(greenLED, LOW);
     lightShow();
   }
 }
