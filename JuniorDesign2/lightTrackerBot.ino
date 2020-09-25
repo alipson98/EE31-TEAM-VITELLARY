@@ -51,7 +51,7 @@ const int AN_SPEED = 100;
 const int LIGHT_THRESHOLD = 775; // TODO: set this
 
 BOT_STATE state;
-const unsigned int light_track_length = 15000; // 15 seconds
+const unsigned int light_track_length = 25000; // 25 seconds
 unsigned long light_track_start;
 
 void setup(){

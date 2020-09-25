@@ -43,7 +43,7 @@ const static int BLUE = 3;
 const int thermPin = A1;
 int tempReading = 0;
 int statusLight = 2;
-const int thermThresh = 283; // TODO: test and change this to the correct value
+const int thermThresh = 286; // TODO: test and change this to the correct value
 
 bool lightTrack = false;
 
