@@ -3,7 +3,7 @@
 #include <SPI.h>
 #include <WiFiNINA.h>
 
-/*** these name macros should be used only as reference to ser ME and PARTNER ***/
+/*** these name macros should be used only as reference to set ME and PARTNER ***/
 // SEAN "2EA3F426665F"
 // BRANDON "59350B9773E5"
 // TASWAR "F37F8862AD3C"
@@ -221,6 +221,10 @@ void Drive_pivot_right(){
  * 
  */
 void Follow_Light() {
+  if (millis() - light_track_start > light_track_length) {
+    state = FINISHED;
+    return;
+  }
     if (analogRead(A0) < LIGHT_THRESHOLD) {
       digitalWrite(greenLED, HIGH);
       lightTrack = true;

@@ -3,7 +3,7 @@
 #include <SPI.h>
 #include <WiFiNINA.h>
 
-/*** these name macros should be used only as reference to ser ME and PARTNER ***/
+/*** these name macros should be used only as reference to set ME and PARTNER ***/
 // SEAN "2EA3F426665F"
 // BRANDON "59350B9773E5"
 // TASWAR "F37F8862AD3C"
@@ -13,7 +13,7 @@
 
 // TODO: set these to the correct values
 #define ME "86A43FF4A96C" // adam
-#define PARTNER "A021AFE7B2B2" // varun
+#define PARTNER "59350B9773E5" // brandon
 
 #define MAX_MESSAGE_SIZE 1024
 #define FOLLOW_TIMEOUT 500 // 1 second
